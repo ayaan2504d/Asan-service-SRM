@@ -19,6 +19,8 @@
 
 @include('partials.alerts')
 
+@php $wa = new \App\Services\WhatsAppService(); @endphp
+
 {{-- Filter Bar --}}
 <form method="GET" class="filter-bar">
     <div class="global-search-wrap" style="max-width:320px;">
@@ -114,6 +116,11 @@
                             <a href="{{ route('leads.show', $lead) }}" class="btn btn-sm btn-secondary btn-icon" title="View">
                                 <i class="bi bi-eye"></i>
                             </a>
+                            @include('partials.whatsapp-button', [
+                                'wa' => $wa,
+                                'number' => $lead->whatsapp_number ?: $lead->contact,
+                                'message' => $wa->render('thank_you_template', $lead),
+                            ])
                             <a href="{{ route('leads.edit', $lead) }}" class="btn btn-sm btn-warning btn-icon" title="Edit">
                                 <i class="bi bi-pencil"></i>
                             </a>

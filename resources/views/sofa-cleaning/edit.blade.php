@@ -54,6 +54,11 @@
                         <input type="text" id="contact" name="contact" class="form-control @error('contact') is-invalid @enderror" value="{{ old('contact', $sofaCleaning->contact) }}">
                         @error('contact')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
+                    <div class="col-md-6">
+                        <label for="whatsapp_number" class="form-label">WhatsApp Number</label>
+                        <input type="text" id="whatsapp_number" name="whatsapp_number" class="form-control @error('whatsapp_number') is-invalid @enderror" value="{{ old('whatsapp_number', $sofaCleaning->whatsapp_number) }}">
+                        @error('whatsapp_number')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
                     <div class="col-12">
                         <label for="address" class="form-label">Address</label>
                         <textarea id="address" name="address" class="form-control @error('address') is-invalid @enderror" rows="2">{{ old('address', $sofaCleaning->address) }}</textarea>

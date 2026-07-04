@@ -60,6 +60,11 @@
                         @error('contact')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="col-md-4">
+                        <label for="whatsapp_number" class="form-label">WhatsApp Number</label>
+                        <input type="text" id="whatsapp_number" name="whatsapp_number" class="form-control @error('whatsapp_number') is-invalid @enderror" value="{{ old('whatsapp_number', $lead->whatsapp_number) }}">
+                        @error('whatsapp_number')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-4">
                         <label for="platform" class="form-label">Platform</label>
                         <select id="platform" name="platform" class="form-select @error('platform') is-invalid @enderror">
                             <option value="">— Select —</option>

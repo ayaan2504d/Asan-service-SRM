@@ -19,6 +19,8 @@
 
 @include('partials.alerts')
 
+@php $wa = new \App\Services\WhatsAppService(); @endphp
+
 {{-- Filter Bar --}}
 <form method="GET" class="filter-bar">
     <div class="global-search-wrap" style="max-width:320px;">
@@ -98,6 +100,11 @@
                             <a href="{{ route('sofa-cleaning.show', $record) }}" class="btn btn-sm btn-secondary btn-icon" title="View">
                                 <i class="bi bi-eye"></i>
                             </a>
+                            @include('partials.whatsapp-button', [
+                                'wa' => $wa,
+                                'number' => $record->whatsapp_number ?: $record->contact,
+                                'message' => $wa->render('sofa_cleaning_reminder_template', $record),
+                            ])
                             <a href="{{ route('sofa-cleaning.edit', $record) }}" class="btn btn-sm btn-warning btn-icon" title="Edit">
                                 <i class="bi bi-pencil"></i>
                             </a>

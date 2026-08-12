@@ -30,13 +30,21 @@ Route::middleware(['auth'])->group(function () {
 
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/export-pdf', [DashboardController::class, 'exportBusinessPdf'])->name('dashboard.export-pdf');
     Route::get('/search', [DashboardController::class, 'globalSearch'])->name('global.search');
     Route::post('/reminders/{solarClient}/dismiss', [DashboardController::class, 'dismissReminder'])->name('reminders.dismiss');
+    Route::post('/service-reminders/{reminder}/complete', [DashboardController::class, 'completeReminder'])->name('reminders.complete');
 
     // Solar Clients
     Route::resource('solar-clients', SolarClientController::class);
 
-    // Marketing Leads
+    // Marketing Leads specific routes
+    Route::get('/leads/check-phone', [LeadController::class, 'checkPhone'])->name('leads.check-phone');
+    Route::post('/leads/{lead}/convert/solar', [LeadController::class, 'convertToSolar'])->name('leads.convert.solar');
+    Route::post('/leads/{lead}/convert/sofa', [LeadController::class, 'convertToSofa'])->name('leads.convert.sofa');
+    Route::post('/leads/{lead}/convert/deep', [LeadController::class, 'convertToDeep'])->name('leads.convert.deep');
+    
+    // Marketing Leads Resource
     Route::resource('leads', LeadController::class);
 
     // Sofa Cleaning
@@ -53,6 +61,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Reports
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.export-pdf');
 
     // Settings (Admin only)
     Route::middleware(['role:admin'])->group(function () {

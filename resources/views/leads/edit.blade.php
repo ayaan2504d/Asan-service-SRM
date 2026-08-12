@@ -1,172 +1,273 @@
 @extends('layouts.app')
-@section('title', 'Edit Lead')
+
+@section('title', 'Edit Marketing Lead')
+
 @section('content')
 
-<div class="page-header">
+<div class="page-header d-flex flex-wrap justify-content-between align-items-center mb-4">
     <div class="page-header-left">
-        <h1>Edit Marketing Lead</h1>
+        <h1 class="h3 fw-bold mb-1"><i class="bi bi-pencil-square me-2 text-warning"></i>Edit Marketing Lead: {{ $lead->lead_id }}</h1>
         <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
+            <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('leads.index') }}">Leads</a></li>
-                <li class="breadcrumb-item active">{{ $lead->lead_id }}</li>
+                <li class="breadcrumb-item"><a href="{{ route('leads.index') }}">Marketing Leads</a></li>
+                <li class="breadcrumb-item active">Edit</li>
             </ol>
         </nav>
     </div>
-    <div class="d-flex gap-2">
-        <a href="{{ route('leads.show', $lead) }}" class="btn btn-secondary">
-            <i class="bi bi-eye"></i> View
-        </a>
-        <a href="{{ route('leads.index') }}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Back
+    <div class="mt-2 mt-sm-0">
+        <a href="{{ route('leads.index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Leads
         </a>
     </div>
 </div>
 
-@include('partials.alerts')
-
-<div class="card">
-    <div class="card-header">
-        <h5 class="card-title">
-            <i class="bi bi-pencil-fill me-2" style="color:var(--primary)"></i>
-            Editing: <span class="id-badge lead">{{ $lead->lead_id }}</span>
-        </h5>
+{{-- Duplicate Customer Alert --}}
+<div id="duplicateCustomerAlert" class="alert alert-warning border-warning d-none mb-4" role="alert">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div>
+            <i class="bi bi-exclamation-triangle-fill fs-5 me-2 text-warning"></i>
+            <strong id="duplicateMessage">Customer Already Exists</strong>
+        </div>
+        <a id="btnOpenExistingCustomer" href="#" target="_blank" class="btn btn-warning text-dark font-semibold btn-sm">
+            <i class="bi bi-box-arrow-up-right me-1"></i> Open Existing Customer
+        </a>
     </div>
-    <div class="card-body">
-        <form method="POST" action="{{ route('leads.update', $lead) }}">
-            @csrf @method('PUT')
+</div>
 
+<form method="POST" action="{{ route('leads.update', $lead) }}" id="editLeadForm">
+    @csrf
+    @method('PUT')
+
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+            <h5 class="fw-bold mb-0 text-primary"><i class="bi bi-file-earmark-text me-2"></i>Lead Information</h5>
+        </div>
+
+        <div class="card-body p-4">
+
+            {{-- Row 1: Lead ID, Customer Name, Phone Number --}}
+            <div class="row g-3 mb-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Lead ID</label>
+                    <input type="text" class="form-control bg-light font-monospace" value="{{ $lead->lead_id }}" readonly>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Customer Name <span class="text-danger">*</span></label>
+                    <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $lead->name) }}" required>
+                    @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+
+                <div class="col-md-5">
+                    <label class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
+                    <input type="text" name="contact" id="contactInput" class="form-control @error('contact') is-invalid @enderror" value="{{ old('contact', $lead->contact) }}" required>
+                    @error('contact')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+            </div>
+
+            {{-- Row 2: Address, Lead Source, Campaign Name --}}
+            <div class="row g-3 mb-3">
+                <div class="col-md-5">
+                    <label class="form-label fw-semibold">Address</label>
+                    <input type="text" name="address" class="form-control @error('address') is-invalid @enderror" value="{{ old('address', $lead->effective_address) }}">
+                    @error('address')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Lead Source <span class="text-danger">*</span></label>
+                    <select name="lead_source" class="form-select @error('lead_source') is-invalid @enderror" required>
+                        <option value="Facebook" {{ old('lead_source', $lead->effective_lead_source) == 'Facebook' ? 'selected' : '' }}>Facebook</option>
+                        <option value="Instagram" {{ old('lead_source', $lead->effective_lead_source) == 'Instagram' ? 'selected' : '' }}>Instagram</option>
+                        <option value="WhatsApp" {{ old('lead_source', $lead->effective_lead_source) == 'WhatsApp' ? 'selected' : '' }}>WhatsApp</option>
+                        <option value="Reference" {{ old('lead_source', $lead->effective_lead_source) == 'Reference' ? 'selected' : '' }}>Reference</option>
+                        <option value="Other" {{ old('lead_source', $lead->effective_lead_source) == 'Other' ? 'selected' : '' }}>Other</option>
+                    </select>
+                    @error('lead_source')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Campaign Name</label>
+                    <input type="text" name="campaign_name" class="form-control @error('campaign_name') is-invalid @enderror" value="{{ old('campaign_name', $lead->campaign_name) }}">
+                    @error('campaign_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+            </div>
+
+            {{-- Row 3: Service Type, Status --}}
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Service Type <span class="text-danger">*</span></label>
+                    <select name="service_type" id="serviceTypeSelect" class="form-select @error('service_type') is-invalid @enderror" required>
+                        <option value="Solar Cleaning" {{ old('service_type', $lead->effective_service_type) == 'Solar Cleaning' ? 'selected' : '' }}>Solar Cleaning</option>
+                        <option value="Sofa Cleaning" {{ old('service_type', $lead->effective_service_type) == 'Sofa Cleaning' ? 'selected' : '' }}>Sofa Cleaning</option>
+                        <option value="Deep Cleaning" {{ old('service_type', $lead->effective_service_type) == 'Deep Cleaning' ? 'selected' : '' }}>Deep Cleaning</option>
+                    </select>
+                    @error('service_type')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
+                    <select name="status" class="form-select @error('status') is-invalid @enderror" required>
+                        <option value="Pending" {{ old('status', $lead->effective_status) == 'Pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="Follow Up" {{ old('status', $lead->effective_status) == 'Follow Up' ? 'selected' : '' }}>Follow Up</option>
+                        <option value="Done" {{ old('status', $lead->effective_status) == 'Done' ? 'selected' : '' }}>Done</option>
+                        <option value="Cancel" {{ old('status', $lead->effective_status) == 'Cancel' ? 'selected' : '' }}>Cancel</option>
+                    </select>
+                    @error('status')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+            </div>
+
+            {{-- ════ DYNAMIC FIELDS SECTION ════ --}}
+
+            {{-- Solar Cleaning Fields --}}
+            <div id="solarFields" class="card border border-warning bg-warning bg-opacity-10 rounded-3 mb-4 d-none">
+                <div class="card-body">
+                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-sun-fill text-warning me-2"></i>Solar Cleaning Details</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Number of Solar Plates</label>
+                            <input type="number" name="num_plates" class="form-control" value="{{ old('num_plates', $lead->num_plates) }}" min="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Quoted Amount (Optional)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₨</span>
+                                <input type="number" step="0.01" name="quoted_amount" class="form-control" value="{{ old('quoted_amount', $lead->quoted_amount ?: $lead->estimated_amount) }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Sofa Cleaning Fields --}}
+            <div id="sofaFields" class="card border border-info bg-info bg-opacity-10 rounded-3 mb-4 d-none">
+                <div class="card-body">
+                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-diamond-fill text-info me-2"></i>Sofa Cleaning Details</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Number of Sofas</label>
+                            <input type="number" name="num_sofas" class="form-control" value="{{ old('num_sofas', $lead->num_sofas) }}" min="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Sofa Type</label>
+                            <select name="sofa_type" class="form-select">
+                                <option value="">Select Sofa Type</option>
+                                <option value="3 Seater" {{ old('sofa_type', $lead->sofa_type) == '3 Seater' ? 'selected' : '' }}>3 Seater</option>
+                                <option value="5 Seater" {{ old('sofa_type', $lead->sofa_type) == '5 Seater' ? 'selected' : '' }}>5 Seater</option>
+                                <option value="L Shape" {{ old('sofa_type', $lead->sofa_type) == 'L Shape' ? 'selected' : '' }}>L Shape</option>
+                                <option value="Custom" {{ old('sofa_type', $lead->sofa_type) == 'Custom' ? 'selected' : '' }}>Custom</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Deep Cleaning Fields --}}
+            <div id="deepFields" class="card border border-primary bg-primary bg-opacity-10 rounded-3 mb-4 d-none">
+                <div class="card-body">
+                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-brush-fill me-2"></i>Deep Cleaning Details</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">House Size</label>
+                            <input type="text" name="house_size" class="form-control" value="{{ old('house_size', $lead->house_size) }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Floors</label>
+                            <select name="floors" class="form-select">
+                                <option value="">Select Floors</option>
+                                <option value="Ground" {{ old('floors', $lead->floors) == 'Ground' ? 'selected' : '' }}>Ground</option>
+                                <option value="G+1" {{ old('floors', $lead->floors) == 'G+1' ? 'selected' : '' }}>G+1</option>
+                                <option value="G+2" {{ old('floors', $lead->floors) == 'G+2' ? 'selected' : '' }}>G+2</option>
+                                <option value="G+3" {{ old('floors', $lead->floors) == 'G+3' ? 'selected' : '' }}>G+3</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Notes --}}
             <div class="mb-4">
-                <label class="form-label">Lead ID</label>
-                <div class="auto-id-display">{{ $lead->lead_id }}</div>
+                <label class="form-label fw-semibold">Notes</label>
+                <textarea name="notes" class="form-control" rows="3">{{ old('notes', $lead->notes) }}</textarea>
             </div>
 
-            <div class="form-section">
-                <div class="form-section-title">Lead Information</div>
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label for="date" class="form-label">Date</label>
-                        <input type="date" id="date" name="date" class="form-control @error('date') is-invalid @enderror" value="{{ old('date', $lead->date?->format('Y-m-d')) }}">
-                        @error('date')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="col-md-4">
-                        <label for="name" class="form-label">Name</label>
-                        <input type="text" id="name" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $lead->name) }}">
-                        @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="col-md-4">
-                        <label for="contact" class="form-label">Contact</label>
-                        <input type="text" id="contact" name="contact" class="form-control @error('contact') is-invalid @enderror" value="{{ old('contact', $lead->contact) }}">
-                        @error('contact')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="col-md-4">
-                        <label for="whatsapp_number" class="form-label">WhatsApp Number</label>
-                        <input type="text" id="whatsapp_number" name="whatsapp_number" class="form-control @error('whatsapp_number') is-invalid @enderror" value="{{ old('whatsapp_number', $lead->whatsapp_number) }}">
-                        @error('whatsapp_number')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="col-md-4">
-                        <label for="platform" class="form-label">Platform</label>
-                        <select id="platform" name="platform" class="form-select @error('platform') is-invalid @enderror">
-                            <option value="">— Select —</option>
-                            <option value="Facebook" {{ old('platform', $lead->platform) == 'Facebook' ? 'selected':'' }}>Facebook</option>
-                            <option value="Instagram" {{ old('platform', $lead->platform) == 'Instagram' ? 'selected':'' }}>Instagram</option>
-                            <option value="Google" {{ old('platform', $lead->platform) == 'Google' ? 'selected':'' }}>Google</option>
-                            <option value="Referral" {{ old('platform', $lead->platform) == 'Referral' ? 'selected':'' }}>Referral</option>
-                            <option value="Direct" {{ old('platform', $lead->platform) == 'Direct' ? 'selected':'' }}>Direct</option>
-                            <option value="Other" {{ old('platform', $lead->platform) == 'Other' ? 'selected':'' }}>Other</option>
-                        </select>
-                        @error('platform')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="col-md-4">
-                        <label for="campaign_name" class="form-label">Campaign Name</label>
-                        <input type="text" id="campaign_name" name="campaign_name" class="form-control @error('campaign_name') is-invalid @enderror" value="{{ old('campaign_name', $lead->campaign_name) }}">
-                        @error('campaign_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="col-md-4">
-                        <label for="response" class="form-label">Response</label>
-                        <select id="response" name="response" class="form-select @error('response') is-invalid @enderror">
-                            <option value="">— Select —</option>
-                            <option value="Positive" {{ old('response', $lead->response) == 'Positive' ? 'selected':'' }}>Positive</option>
-                            <option value="Neutral" {{ old('response', $lead->response) == 'Neutral' ? 'selected':'' }}>Neutral</option>
-                            <option value="Negative" {{ old('response', $lead->response) == 'Negative' ? 'selected':'' }}>Negative</option>
-                            <option value="No Answer" {{ old('response', $lead->response) == 'No Answer' ? 'selected':'' }}>No Answer</option>
-                            <option value="Follow Up" {{ old('response', $lead->response) == 'Follow Up' ? 'selected':'' }}>Follow Up</option>
-                        </select>
-                        @error('response')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="col-md-4">
-                        <label for="location" class="form-label">Location</label>
-                        <input type="text" id="location" name="location" class="form-control @error('location') is-invalid @enderror" value="{{ old('location', $lead->location) }}">
-                        @error('location')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                </div>
-            </div>
+        </div>
 
-            <div class="form-section">
-                <div class="form-section-title">Service Details</div>
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label for="type_of_site" class="form-label">Type of Site</label>
-                        <input type="text" id="type_of_site" name="type_of_site" class="form-control @error('type_of_site') is-invalid @enderror" value="{{ old('type_of_site', $lead->type_of_site) }}">
-                        @error('type_of_site')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="col-md-4">
-                        <label for="type_of_service" class="form-label">Type of Service</label>
-                        <input type="text" id="type_of_service" name="type_of_service" class="form-control @error('type_of_service') is-invalid @enderror" value="{{ old('type_of_service', $lead->type_of_service) }}">
-                        @error('type_of_service')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="col-md-4">
-                        <label for="size_of_area" class="form-label">Size of Area</label>
-                        <input type="text" id="size_of_area" name="size_of_area" class="form-control @error('size_of_area') is-invalid @enderror" value="{{ old('size_of_area', $lead->size_of_area) }}">
-                        @error('size_of_area')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="col-md-4">
-                        <label for="num_items" class="form-label">Number of Items</label>
-                        <input type="number" id="num_items" name="num_items" class="form-control @error('num_items') is-invalid @enderror" value="{{ old('num_items', $lead->num_items) }}" min="0">
-                        @error('num_items')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-section">
-                <div class="form-section-title">Booking & Payment</div>
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label for="booking_date" class="form-label">Date of Booking</label>
-                        <input type="date" id="booking_date" name="booking_date" class="form-control @error('booking_date') is-invalid @enderror" value="{{ old('booking_date', $lead->booking_date?->format('Y-m-d')) }}">
-                        @error('booking_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="col-md-4">
-                        <label for="service_date" class="form-label">Date of Service</label>
-                        <input type="date" id="service_date" name="service_date" class="form-control @error('service_date') is-invalid @enderror" value="{{ old('service_date', $lead->service_date?->format('Y-m-d')) }}">
-                        @error('service_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="col-md-4">
-                        <label for="appointment_time" class="form-label">Appointment Time</label>
-                        <input type="time" id="appointment_time" name="appointment_time" class="form-control @error('appointment_time') is-invalid @enderror" value="{{ old('appointment_time', $lead->appointment_time ? \Carbon\Carbon::parse($lead->appointment_time)->format('H:i') : '') }}">
-                        @error('appointment_time')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="col-md-4">
-                        <label for="estimated_amount" class="form-label">Estimated Amount (₨)</label>
-                        <input type="number" step="0.01" id="estimated_amount" name="estimated_amount" class="form-control @error('estimated_amount') is-invalid @enderror" value="{{ old('estimated_amount', $lead->estimated_amount) }}" min="0">
-                        @error('estimated_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="col-md-4">
-                        <label for="amount_received" class="form-label">Amount Received (₨)</label>
-                        <input type="number" step="0.01" id="amount_received" name="amount_received" class="form-control @error('amount_received') is-invalid @enderror" value="{{ old('amount_received', $lead->amount_received) }}" min="0">
-                        @error('amount_received')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                </div>
-            </div>
-
-            <div class="d-flex gap-3">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-lg"></i> Update Lead
-                </button>
-                <a href="{{ route('leads.index') }}" class="btn btn-secondary">Cancel</a>
-            </div>
-        </form>
+        <div class="card-footer bg-light border-0 p-4 text-end">
+            <button type="submit" id="btnSubmitLead" class="btn btn-warning px-4 shadow-sm text-dark font-semibold">
+                <i class="bi bi-check-circle me-1"></i> Update Marketing Lead
+            </button>
+        </div>
     </div>
-</div>
+</form>
 
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const serviceTypeSelect = document.getElementById('serviceTypeSelect');
+    const solarFields = document.getElementById('solarFields');
+    const sofaFields = document.getElementById('sofaFields');
+    const deepFields = document.getElementById('deepFields');
+
+    function toggleServiceFields() {
+        const selected = serviceTypeSelect.value;
+        solarFields.classList.add('d-none');
+        sofaFields.classList.add('d-none');
+        deepFields.classList.add('d-none');
+
+        if (selected === 'Solar Cleaning') {
+            solarFields.classList.remove('d-none');
+        } else if (selected === 'Sofa Cleaning') {
+            sofaFields.classList.remove('d-none');
+        } else if (selected === 'Deep Cleaning') {
+            deepFields.classList.remove('d-none');
+        }
+    }
+
+    serviceTypeSelect.addEventListener('change', toggleServiceFields);
+    toggleServiceFields(); // Initial run
+
+    // Duplicate Phone Check AJAX
+    const contactInput = document.getElementById('contactInput');
+    const duplicateAlert = document.getElementById('duplicateCustomerAlert');
+    const duplicateMessage = document.getElementById('duplicateMessage');
+    const btnOpenExistingCustomer = document.getElementById('btnOpenExistingCustomer');
+    const btnSubmitLead = document.getElementById('btnSubmitLead');
+    const leadId = {{ $lead->id }};
+
+    let debounceTimer;
+    contactInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        const contact = this.value.trim();
+
+        if (contact.length < 5) {
+            duplicateAlert.classList.add('d-none');
+            btnSubmitLead.disabled = false;
+            return;
+        }
+
+        debounceTimer = setTimeout(() => {
+            fetch(`{{ route('leads.check-phone') }}?contact=${encodeURIComponent(contact)}&ignore_id=${leadId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.exists) {
+                        duplicateMessage.textContent = `Customer Already Exists (${data.customer_name})`;
+                        btnOpenExistingCustomer.href = data.customer_url;
+                        duplicateAlert.classList.remove('d-none');
+                        btnSubmitLead.disabled = true;
+                    } else {
+                        duplicateAlert.classList.add('d-none');
+                        btnSubmitLead.disabled = false;
+                    }
+                })
+                .catch(() => {
+                    duplicateAlert.classList.add('d-none');
+                    btnSubmitLead.disabled = false;
+                });
+        }, 400);
+    });
+});
+</script>
+@endpush

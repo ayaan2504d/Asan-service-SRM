@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class WhatsAppSetting extends Model
 {
+    // IMPORTANT: Table name explicitly define karo
+    protected $table = 'whatsapp_settings';
+
     protected $fillable = [
         'business_number',
         'default_country_code',
@@ -27,11 +30,21 @@ class WhatsAppSetting extends Model
             'business_number' => null,
             'default_country_code' => '92',
             'enabled' => true,
-            'solar_follow_up_template' => 'Assalam o Alaikum {name}, this is Asan Home Service. Your solar follow-up for customer ID {id} is due. Latest visit: {latest_visit}.',
-            'sofa_cleaning_reminder_template' => 'Assalam o Alaikum {name}, this is Asan Home Service. We are following up about your sofa cleaning service.',
-            'deep_cleaning_reminder_template' => 'Assalam o Alaikum {name}, this is Asan Home Service. We are following up about your deep cleaning service.',
-            'payment_reminder_template' => 'Assalam o Alaikum {name}, this is Asan Home Service. This is a gentle payment reminder for customer ID {id}.',
-            'thank_you_template' => 'Thank you {name} for choosing Asan Home Service. We appreciate your trust.',
+
+            'solar_follow_up_template' =>
+                'Assalam o Alaikum {name}, this is Asan Home Service. Your solar follow-up for customer ID {id} is due. Latest visit: {latest_visit}.',
+
+            'sofa_cleaning_reminder_template' =>
+                'Assalam o Alaikum {name}, this is Asan Home Service. We are following up about your sofa cleaning service.',
+
+            'deep_cleaning_reminder_template' =>
+                'Assalam o Alaikum {name}, this is Asan Home Service. We are following up about your deep cleaning service.',
+
+            'payment_reminder_template' =>
+                'Assalam o Alaikum {name}, this is Asan Home Service. This is a gentle payment reminder for customer ID {id}.',
+
+            'thank_you_template' =>
+                'Thank you {name} for choosing Asan Home Service. We appreciate your trust.',
         ];
     }
 
@@ -45,4 +58,4 @@ class WhatsAppSetting extends Model
 
         return self::create(self::defaults());
     }
-}
+};
